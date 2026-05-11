@@ -54,7 +54,10 @@ app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", 'dev-secret-key')
 # DATABASE SETUP (SQLite)
 # ========================
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'hiresense.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
+    "DATABASE_URL",
+    "postgresql://user:password@localhost:5432/hiresense"
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
