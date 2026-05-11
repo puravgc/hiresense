@@ -4,9 +4,13 @@ from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from authlib.integrations.flask_client import OAuth
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail, Message
 import os
+import re
 from dotenv import load_dotenv
 from functools import wraps
+from datetime import datetime
 import io
 
 load_dotenv()
@@ -45,6 +49,43 @@ Session(app)
 app.config['GOOGLE_CLIENT_ID'] = os.getenv("GOOGLE_CLIENT_ID")
 app.config['GOOGLE_CLIENT_SECRET'] = os.getenv("GOOGLE_CLIENT_SECRET")
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", 'dev-secret-key')
+
+# ========================
+# DATABASE SETUP (SQLite)
+# ========================
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'hiresense.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+class HirerProfile(db.Model):
+    __tablename__ = 'hirer_profiles'
+    id           = db.Column(db.Integer, primary_key=True)
+    google_id    = db.Column(db.String(100), unique=True, nullable=False)
+    email        = db.Column(db.String(200))
+    company_name = db.Column(db.String(200))
+    company_size = db.Column(db.String(50))
+    industry     = db.Column(db.String(100))
+    location     = db.Column(db.String(200))
+    website      = db.Column(db.String(200))
+    your_role    = db.Column(db.String(100))
+    created_at   = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at   = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+# Create all tables on startup
+with app.app_context():
+    db.create_all()
+
+# ========================
+# MAIL SETUP
+# ========================
+app.config['MAIL_SERVER']   = 'smtp.gmail.com'
+app.config['MAIL_PORT']     = 587
+app.config['MAIL_USE_TLS']  = True
+app.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")
+app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv("MAIL_DEFAULT_SENDER")
+mail = Mail(app)
 
 # Google OAuth
 oauth = OAuth(app)
@@ -99,6 +140,12 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def extract_email_from_text(text):
+    """Fallback regex extractor for emails if NER misses them."""
+    pattern = r'[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}'
+    matches = re.findall(pattern, text)
+    return matches[0] if matches else None
+
 # ========================
 # AUTH API ENDPOINTS
 # ========================
@@ -109,14 +156,21 @@ def home():
 
 @app.route('/api/auth/status')
 def auth_status():
-    """Check current authentication status"""
+    """Check current authentication status and onboarding state."""
     user_data = session.get('user')
     is_admin = session.get('admin_logged_in', False)
     is_logged_in = current_user.is_authenticated if hasattr(current_user, 'is_authenticated') else False
+
+    has_profile = False
+    if is_logged_in and current_user.id:
+        profile = HirerProfile.query.filter_by(google_id=current_user.id).first()
+        has_profile = profile is not None
+
     return jsonify({
         "logged_in": is_logged_in,
         "user": user_data,
-        "is_admin": is_admin
+        "is_admin": is_admin,
+        "has_profile": has_profile
     })
 
 @app.route('/api/google-login')
@@ -169,6 +223,114 @@ def admin_login():
 def admin_logout():
     session.pop('admin_logged_in', None)
     return jsonify({"message": "Admin logged out successfully"})
+
+# ========================
+# HIRER PROFILE API
+# ========================
+
+@app.route('/api/hirer/profile', methods=['GET'])
+@login_required
+def get_hirer_profile():
+    """Get the current hirer's company profile."""
+    profile = HirerProfile.query.filter_by(google_id=current_user.id).first()
+    if not profile:
+        return jsonify({"profile": None, "has_profile": False})
+
+    return jsonify({
+        "has_profile": True,
+        "profile": {
+            "company_name": profile.company_name,
+            "company_size": profile.company_size,
+            "industry": profile.industry,
+            "location": profile.location,
+            "website": profile.website,
+            "your_role": profile.your_role,
+            "email": profile.email,
+        }
+    })
+
+@app.route('/api/hirer/profile', methods=['POST'])
+@login_required
+def save_hirer_profile():
+    """Create or update the current hirer's company profile."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    required = ['company_name', 'industry', 'company_size', 'your_role', 'location']
+    for field in required:
+        if not data.get(field):
+            return jsonify({"error": f"Missing required field: {field}"}), 400
+
+    profile = HirerProfile.query.filter_by(google_id=current_user.id).first()
+    user_data = session.get('user', {})
+
+    if profile:
+        # Update existing
+        profile.company_name = data['company_name']
+        profile.company_size = data['company_size']
+        profile.industry     = data['industry']
+        profile.location     = data['location']
+        profile.website      = data.get('website', '')
+        profile.your_role    = data['your_role']
+        profile.email        = user_data.get('email', '')
+        profile.updated_at   = datetime.utcnow()
+    else:
+        # Create new
+        profile = HirerProfile(
+            google_id    = current_user.id,
+            email        = user_data.get('email', ''),
+            company_name = data['company_name'],
+            company_size = data['company_size'],
+            industry     = data['industry'],
+            location     = data['location'],
+            website      = data.get('website', ''),
+            your_role    = data['your_role'],
+        )
+        db.session.add(profile)
+
+    db.session.commit()
+    return jsonify({"message": "Profile saved successfully", "has_profile": True})
+
+# ========================
+# SEND EMAIL API
+# ========================
+
+@app.route('/api/send-email', methods=['POST'])
+@login_required
+def send_email():
+    """Send an email from the hirer to a candidate."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    to_email = data.get('to_email', '').strip()
+    subject  = data.get('subject', '').strip()
+    body     = data.get('body', '').strip()
+
+    if not to_email:
+        return jsonify({"error": "Recipient email is required"}), 400
+    if not subject:
+        return jsonify({"error": "Subject is required"}), 400
+    if not body:
+        return jsonify({"error": "Email body is required"}), 400
+
+    # Validate email format
+    email_pattern = r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$'
+    if not re.match(email_pattern, to_email):
+        return jsonify({"error": "Invalid recipient email address"}), 400
+
+    try:
+        msg = Message(
+            subject=subject,
+            recipients=[to_email],
+            body=body
+        )
+        mail.send(msg)
+        return jsonify({"message": f"Email sent successfully to {to_email}"})
+    except Exception as e:
+        print(f"Email error: {e}")
+        return jsonify({"error": f"Failed to send email: {str(e)}"}), 500
 
 # ========================
 # PARSE RESUME API
@@ -259,6 +421,14 @@ def api_rank():
         else:
             name = os.path.basename(resume_path)
 
+        # Get email — NER first, fallback to regex
+        candidate_email = None
+        raw_emails = resume_features[1]  # index 1 = email from exResFeats return tuple
+        if raw_emails and len(raw_emails) > 0:
+            candidate_email = raw_emails[0]
+        if not candidate_email:
+            candidate_email = extract_email_from_text(resume_text)
+
         ranked_resumes.append({
             "name": name,
             "resume_path": resume_path,
@@ -267,6 +437,7 @@ def api_rank():
             "education_match": round(similarity_results.get("education_match", 0), 2),
             "skill_match": round(similarity_results.get("skill_match", 0), 2),
             "language_match": round(similarity_results.get("language_match", 0), 2),
+            "candidate_email": candidate_email or "",
         })
 
     ranked_resumes.sort(key=lambda x: x["score"], reverse=True)
@@ -331,10 +502,10 @@ def api_customize():
     if request.method == 'POST':
         data = request.get_json()
         try:
-            exp = float(data.get('experience_weight', 0.3))
-            edu = float(data.get('education_weight', 0.2))
+            exp   = float(data.get('experience_weight', 0.3))
+            edu   = float(data.get('education_weight', 0.2))
             skill = float(data.get('skill_weight', 0.4))
-            lang = float(data.get('language_weight', 0.1))
+            lang  = float(data.get('language_weight', 0.1))
 
             total = exp + edu + skill + lang
             if total == 0:
@@ -342,9 +513,9 @@ def api_customize():
 
             session['weights'] = {
                 'experience': exp / total,
-                'education': edu / total,
-                'skill': skill / total,
-                'language': lang / total
+                'education':  edu / total,
+                'skill':      skill / total,
+                'language':   lang / total
             }
             return jsonify({"message": "Weights updated successfully", "weights": session['weights']})
         except Exception as e:

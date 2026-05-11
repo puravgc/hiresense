@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api/axios';
 import Toast from '../components/Toast';
+import FileDropzone from '../components/FileDropzone';
 
 export default function ParseResume() {
   const [file, setFile] = useState(null);
@@ -10,21 +11,15 @@ export default function ParseResume() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleUpload = () => {
-    if (file) {
-      setUploaded(true);
-      setToast({ message: 'Resume uploaded successfully!', type: 'success' });
-    } else {
-      setToast({ message: 'Please select a resume first!', type: 'error' });
-    }
+  const handleFilesSelected = (selectedFile) => {
+    setFile(selectedFile);
+    setUploaded(true);
+    setToast({ message: 'Resume ready!', type: 'success' });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!uploaded) {
-      setToast({ message: 'Please select and upload a resume first!', type: 'warning' });
-      return;
-    }
+    if (!file) { setToast({ message: 'Please select your resume first.', type: 'warning' }); return; }
     setLoading(true);
     const formData = new FormData();
     formData.append('resume', file);
@@ -33,41 +28,41 @@ export default function ParseResume() {
       navigate('/resume-details', { state: { features: res.data.features } });
     } catch (err) {
       setToast({ message: err.response?.data?.error || 'Parsing failed!', type: 'error' });
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   return (
-    <div className="container">
+    <div className="page animate-up">
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       {loading && (
         <div id="loading">
-          <div className="spinner-grow" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
+          <div className="loading-spinner" />
+          <span className="loading-text">Parsing your resume…</span>
         </div>
       )}
-      <div className="jumbotron">
-        <img src="/images/resume.png" height="50" style={{ display: 'block', margin: 'auto' }} alt="resume" />
-        <br />
-        <h1 style={{ textAlign: 'center', color: 'black', fontSize: '30px', fontFamily: "'Barlow', sans-serif" }}>Resume Parser</h1>
-        <hr />
-        <br />
-        <h5 style={{ color: 'black', fontSize: '18px', fontFamily: "'Barlow', sans-serif" }}>
-          Upload a <strong>Resume</strong> and hit the <strong>Parse</strong> button to parse your resume...
-        </h5>
-        <br />
+
+      <div className="page-header">
+        <span className="page-icon">📄</span>
+        <h1 className="page-title">Resume Parser</h1>
+        <p className="page-subtitle">Upload a resume and we'll extract structured features using our NER model.</p>
+      </div>
+      <hr className="page-divider" />
+
+      <div className="card-dark" style={{ maxWidth: 560, margin: '0 auto' }}>
         <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label className="form-label" style={{ color: 'black', fontSize: '15px', fontFamily: "'Barlow', sans-serif" }}>Resume:</label>
-            <div className="input-group" style={{ fontSize: '15px', fontFamily: "'Barlow', sans-serif" }}>
-              <input type="file" className="form-control" accept=".pdf,.docx,.txt" onChange={e => { setFile(e.target.files[0]); setUploaded(false); }} required />
-              <button className="btn btn-secondary" type="button" onClick={handleUpload} style={{ color: 'white', fontSize: '15px', fontFamily: "'Barlow', sans-serif" }}>Upload</button>
-            </div>
+          <div className="form-field">
+            <label>Resume File <span style={{ color: '#f87171' }}>*</span></label>
+            <FileDropzone onFilesSelected={handleFilesSelected} />
           </div>
-          <br />
-          <input type="submit" className="btn btn-dark btn-lg" value="Parse" style={{ color: 'white', fontSize: '15px', fontFamily: "'Barlow', sans-serif" }} />
+
+          <button 
+            type="submit" 
+            className="btn-primary-dark" 
+            style={{ width: '100%', justifyContent: 'center', padding: '0.8rem', marginTop: '1rem' }}
+            disabled={!file}
+          >
+            🔍 Parse Resume
+          </button>
         </form>
       </div>
     </div>

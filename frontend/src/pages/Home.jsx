@@ -1,165 +1,84 @@
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
+const QUICK_ACTIONS = [
+  { icon: '🏆', label: 'Rank Resumes', desc: 'Upload a JD and multiple CVs for instant ranked results.', to: '/rank', accent: '#6c63ff' },
+  { icon: '📄', label: 'Parse a Resume', desc: 'Extract structured features from a single resume.', to: '/parse-resume', accent: '#10b981' },
+  { icon: '💼', label: 'Parse a Job Description', desc: 'Extract requirements from any job description.', to: '/parse-job', accent: '#a78bfa' },
+];
+
+const HOW_IT_WORKS = [
+  { n: '01', title: 'Upload Job Description', desc: 'PDF, DOCX, or TXT accepted.' },
+  { n: '02', title: 'Upload Resumes', desc: 'Add as many candidate CVs as you need.' },
+  { n: '03', title: 'Get Ranked Results', desc: 'AI scores every candidate instantly.' },
+  { n: '04', title: 'Email Top Candidates', desc: 'Send invitations directly from HireSense.' },
+];
 
 export default function Home() {
+  const { user } = useAuth();
+
   return (
-    <>
-      {/* Banner Section */}
-      <div className="position-relative">
-        <img src="/images/ban1.jpg" className="img-fluid w-100" alt="Banner" />
-        <div className="position-absolute top-50 start-50 translate-middle text-white text-center">
-          <img
-            src="/images/skillSync6.png"
-            style={{ width: "300px" }}
-            alt="HireSense Logo"
-          />
-          <p
-            style={{
-              color: "black",
-              fontSize: "20px",
-              fontFamily: "'Barlow', sans-serif",
-            }}
-          >
-            NER based resume ranking system
-          </p>
+    <div className="page-wide animate-up">
+
+      {/* ── Hero ── */}
+      <div style={{ textAlign: 'center', padding: '2.5rem 0 3rem' }}>
+        <div className="section-badge badge-purple">AI-Powered Resume Ranking</div>
+        <h1 style={{
+          fontSize: 'clamp(2rem,4vw,3rem)',
+          fontWeight: 900,
+          letterSpacing: '-0.04em',
+          color: '#fff',
+          margin: '0.75rem 0 0.6rem',
+          fontFamily: 'var(--font)',
+        }}>
+          Welcome back{user?.name ? `, ${user.name.split(' ')[0]}` : ''}!
+        </h1>
+        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1rem', maxWidth: '520px', margin: '0 auto 2rem', lineHeight: 1.65 }}>
+          HireSense uses NER-based AI to parse, score, and rank resumes — so you spend time interviewing the right people.
+        </p>
+        <Link to="/rank" className="btn-primary-dark" style={{ fontSize: '1rem', padding: '0.85rem 2rem' }}>
+          🏆 Start Ranking Now
+        </Link>
+      </div>
+
+      <hr className="page-divider" />
+
+      {/* ── Quick Actions ── */}
+      <div style={{ marginBottom: '3rem' }}>
+        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '1rem' }}>Quick Actions</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
+          {QUICK_ACTIONS.map((a, i) => (
+            <Link key={i} to={a.to} style={{ textDecoration: 'none' }}>
+              <div className="card-dark" style={{ cursor: 'pointer', height: '100%' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>{a.icon}</div>
+                <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#fff', margin: '0 0 0.4rem', fontFamily: 'var(--font)' }}>{a.label}</h3>
+                <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)', margin: 0, lineHeight: 1.6 }}>{a.desc}</p>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
 
-      {/* Content */}
-      <div className="jumbotron" style={{ marginBottom: 0 }}>
-        <p
-          style={{
-            color: "black",
-            fontSize: "30px",
-            fontFamily: "'Barlow', sans-serif",
-            textAlign: "center",
-          }}
-        >
-          Welcome to the HireSense Home Page!
-        </p>
-        <hr />
-        <p
-          style={{
-            color: "black",
-            fontSize: "18px",
-            fontFamily: "'Barlow', sans-serif",
-            textAlign: "justify",
-          }}
-        >
-          If you've somehow landed on this page, you might be wondering what
-          "HireSense" actually is. Well, this page answers it all. Basically,
-          HireSense is a NER based resume ranking system. End of story. Huh?
-          What's that? You need more info? Well if you insist, then I suppose
-          I'll tell you.
-        </p>
-        <p
-          style={{
-            color: "black",
-            fontSize: "18px",
-            fontFamily: "'Barlow', sans-serif",
-            textAlign: "justify",
-          }}
-        >
-          HireSense is a system that allows users to upload job description
-          along with multiple resumes. The system then uses a custom NER model
-          to extract important features from the job description and resumes.
-          The features from each resumes are compared against the features of
-          the job description. Overall match scores between the resumes and the
-          job description are calculated and based on these scores the resumes
-          are ranked. HireSense offers a seamless and user friendly interface
-          for these functionalities and abstracts the complex inner workings of
-          the system from the user. But not only that, HireSense has features
-          that allow users to parse their resumes and job description.
-        </p>
-        <p
-          style={{
-            color: "black",
-            fontSize: "18px",
-            fontFamily: "'Barlow', sans-serif",
-            textAlign: "justify",
-          }}
-        >
-          In this modern world where the number of jobs and potential candidates
-          are increasing day by day, companies require an automated tool that
-          allows them to shortlist hundreds and thousands of resumes. Manual
-          screening introduces error, human bias and is tedious and time
-          consuming. With the help of HireSense companies can efficiently screen
-          through numerous resumes quickly and with little to no resources. All
-          you need is a stable internet connection to access and use this
-          application. Aside from the corporate environment, you as an
-          individual can use this application to parse their resumes to get
-          insight into their skillset in a structured format. This allows them
-          to tweak their resumes to best fit the job that they are applying for,
-          hence increasing their chances of getting hired.
-        </p>
-        <p
-          style={{
-            color: "black",
-            fontSize: "18px",
-            fontFamily: "'Barlow', sans-serif",
-            textAlign: "justify",
-          }}
-        >
-          What's that? You say you're head hurts from all the information dump.
-          You're the one who asked for it, you know. Oh, you also want to know
-          how it works? Well then, head over to the{" "}
-          <Link
-            to="/intro"
-            className="text-reset"
-            style={{ textDecoration: "none", fontWeight: "bold" }}
-          >
-            instruction page
-          </Link>
-          .
-        </p>
-      </div>
-
-      {/* Carousel */}
-      <div id="homeCarousel" className="carousel slide" data-bs-ride="carousel">
-        <div className="carousel-inner">
-          {[
-            "resume1.jpg",
-            "resume2.jpg",
-            "resume3.jpg",
-            "resume4.jpg",
-            "resume5.jpg",
-          ].map((img, i) => (
-            <div
-              className={`carousel-item ${i === 0 ? "active" : ""}`}
-              key={img}
-            >
-              <img
-                src={`/images/${img}`}
-                className="d-block w-100"
-                alt={`slide ${i + 1}`}
-              />
+      {/* ── How It Works ── */}
+      <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius)', border: '1px solid var(--border)', padding: '2rem' }}>
+        <div className="section-badge badge-green" style={{ marginBottom: '1.25rem' }}>How It Works</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.5rem' }}>
+          {HOW_IT_WORKS.map((s, i) => (
+            <div key={i} style={{ textAlign: 'center' }}>
+              <div style={{
+                width: 44, height: 44, borderRadius: '50%',
+                background: 'linear-gradient(135deg,#6c63ff,#a78bfa)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '0.78rem', fontWeight: 800, color: '#fff',
+                margin: '0 auto 0.85rem',
+                boxShadow: '0 0 18px rgba(108,99,255,0.35)',
+              }}>{s.n}</div>
+              <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fff', margin: '0 0 0.3rem', fontFamily: 'var(--font)' }}>{s.title}</h4>
+              <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', margin: 0, lineHeight: 1.6 }}>{s.desc}</p>
             </div>
           ))}
         </div>
-        <button
-          className="carousel-control-prev"
-          type="button"
-          data-bs-target="#homeCarousel"
-          data-bs-slide="prev"
-        >
-          <span
-            className="carousel-control-prev-icon"
-            aria-hidden="true"
-          ></span>
-          <span className="visually-hidden">Previous</span>
-        </button>
-        <button
-          className="carousel-control-next"
-          type="button"
-          data-bs-target="#homeCarousel"
-          data-bs-slide="next"
-        >
-          <span
-            className="carousel-control-next-icon"
-            aria-hidden="true"
-          ></span>
-          <span className="visually-hidden">Next</span>
-        </button>
       </div>
-    </>
+    </div>
   );
 }

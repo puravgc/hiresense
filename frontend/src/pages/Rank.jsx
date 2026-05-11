@@ -2,103 +2,84 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api/axios';
 import Toast from '../components/Toast';
+import FileDropzone from '../components/FileDropzone';
 
 export default function Rank() {
   const [jobFile, setJobFile] = useState(null);
   const [resumeFiles, setResumeFiles] = useState([]);
-  const [jobUploaded, setJobUploaded] = useState(false);
-  const [resUploaded, setResUploaded] = useState(false);
   const [toast, setToast] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleJobUpload = () => {
-    if (jobFile) {
-      setJobUploaded(true);
-      setToast({ message: 'Job post uploaded successfully!', type: 'success' });
-    } else {
-      setToast({ message: 'Please select a job description first!', type: 'error' });
-    }
+  const handleJobSelected = (file) => {
+    setJobFile(file);
+    setToast({ message: 'Job description ready!', type: 'success' });
   };
 
-  const handleResUpload = () => {
-    if (resumeFiles.length > 0) {
-      setResUploaded(true);
-      setToast({ message: 'Resume(s) uploaded successfully!', type: 'success' });
-    } else {
-      setToast({ message: 'Please select resume(s) first!', type: 'error' });
-    }
+  const handleResumesSelected = (files) => {
+    setResumeFiles(files);
+    setToast({ message: `${files.length} resume(s) ready!`, type: 'success' });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!jobUploaded && !resUploaded) {
-      setToast({ message: 'Ranking unsuccessful! No files uploaded', type: 'error' });
+    if (!jobFile || resumeFiles.length === 0) {
+      setToast({ message: 'Please select both a job description and at least one resume.', type: 'warning' });
       return;
     }
-    if (!jobUploaded) {
-      setToast({ message: 'Please select and upload a job post first!', type: 'warning' });
-      return;
-    }
-    if (!resUploaded) {
-      setToast({ message: 'Please select and upload a resume first!', type: 'warning' });
-      return;
-    }
-
     setLoading(true);
     const formData = new FormData();
     formData.append('job_description', jobFile);
-    for (const file of resumeFiles) {
-      formData.append('resumes', file);
-    }
-
+    for (const file of resumeFiles) formData.append('resumes', file);
     try {
       const res = await API.post('/rank', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
       navigate('/results', { state: res.data });
     } catch (err) {
       setToast({ message: err.response?.data?.error || 'Ranking failed!', type: 'error' });
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   return (
-    <div className="container">
+    <div className="page animate-up">
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       {loading && (
         <div id="loading">
-          <div className="spinner-grow" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
+          <div className="loading-spinner" />
+          <span className="loading-text">Ranking resumes… this may take a moment</span>
         </div>
       )}
-      <div className="jumbotron">
-        <img src="/images/ranking.png" height="50" style={{ display: 'block', margin: 'auto' }} alt="ranking" />
-        <br />
-        <h1 style={{ textAlign: 'center', color: 'black', fontSize: '30px', fontFamily: "'Barlow', sans-serif" }}>Resume Ranking</h1>
-        <hr />
-        <br />
-        <h5 style={{ color: 'black', fontSize: '18px', fontFamily: "'Barlow', sans-serif" }}>
-          Upload the job description and resume files and hit the <strong>Rank</strong> button to rank your resumes...
-        </h5>
-        <br />
+
+      <div className="page-header">
+        <span className="page-icon">🏆</span>
+        <h1 className="page-title">Resume Ranking</h1>
+        <p className="page-subtitle">Upload a job description and multiple resumes — get an AI-ranked shortlist instantly.</p>
+      </div>
+      <hr className="page-divider" />
+
+      <div className="card-dark" style={{ maxWidth: 620, margin: '0 auto' }}>
         <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label className="form-label" style={{ color: 'black', fontSize: '15px', fontFamily: "'Barlow', sans-serif" }}>Job Description:</label>
-            <div className="input-group" style={{ fontSize: '15px', fontFamily: "'Barlow', sans-serif" }}>
-              <input type="file" className="form-control" accept=".pdf,.docx,.txt" onChange={e => { setJobFile(e.target.files[0]); setJobUploaded(false); }} required />
-              <button className="btn btn-secondary" type="button" onClick={handleJobUpload} style={{ color: 'white', fontSize: '15px', fontFamily: "'Barlow', sans-serif" }}>Upload</button>
-            </div>
+          {/* Job Description */}
+          <div className="form-field" style={{ marginBottom: '2rem' }}>
+            <label>Job Description <span style={{ color: '#f87171' }}>*</span></label>
+            <FileDropzone onFilesSelected={handleJobSelected} />
           </div>
-          <div className="mb-3">
-            <label className="form-label" style={{ color: 'black', fontSize: '15px', fontFamily: "'Barlow', sans-serif" }}>Resume(s):</label>
-            <div className="input-group" style={{ fontSize: '15px', fontFamily: "'Barlow', sans-serif" }}>
-              <input type="file" className="form-control" accept=".pdf,.docx,.txt" multiple onChange={e => { setResumeFiles(Array.from(e.target.files)); setResUploaded(false); }} required />
-              <button className="btn btn-secondary" type="button" onClick={handleResUpload} style={{ color: 'white', fontSize: '15px', fontFamily: "'Barlow', sans-serif" }}>Upload</button>
-            </div>
+
+          {/* Resumes */}
+          <div className="form-field" style={{ marginBottom: '2rem' }}>
+            <label>Resumes <span style={{ color: '#f87171' }}>*</span></label>
+            <FileDropzone onFilesSelected={handleResumesSelected} multiple={true} />
           </div>
-          <br />
-          <input type="submit" className="btn btn-dark btn-lg" value="Rank" style={{ color: 'white', fontSize: '15px', fontFamily: "'Barlow', sans-serif" }} />
+
+          <div style={{ marginTop: '1rem' }}>
+            <button 
+              type="submit" 
+              className="btn-primary-dark" 
+              style={{ width: '100%', justifyContent: 'center', padding: '0.85rem', fontSize: '1rem' }}
+              disabled={!jobFile || resumeFiles.length === 0}
+            >
+              🏆 Rank Resumes
+            </button>
+          </div>
         </form>
       </div>
     </div>

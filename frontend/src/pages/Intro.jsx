@@ -1,144 +1,121 @@
 import { Link } from 'react-router-dom';
 
 export default function Intro() {
-  const downloadResume = () => {
+  const downloadFile = (filename) => {
     const iframe = document.createElement('iframe');
     iframe.style.display = 'none';
-    iframe.src = '/docx/resume.docx';
-    document.body.appendChild(iframe);
-  };
-
-  const downloadJob = () => {
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = '/docx/job.docx';
+    iframe.src = filename;
     document.body.appendChild(iframe);
   };
 
   return (
-    <>
-      {/* Banner */}
-      <div className="position-relative">
-        <img src="/images/ban2.jpg" className="img-fluid w-100" alt="Banner" />
-        <div className="position-absolute top-50 start-50 translate-middle text-white text-center">
-          <img src="/images/skillSync9.png" style={{ width: '450px' }} alt="HireSense Instructions" />
-        </div>
+    <div className="page animate-up">
+      <div className="page-header">
+        <span className="page-icon">📘</span>
+        <h1 className="page-title">How To Use HireSense</h1>
+        <p className="page-subtitle">A quick guide to formatting your files and getting the best precision from our AI models.</p>
       </div>
+      <hr className="page-divider" />
 
-      <div className="jumbotron" style={{ marginBottom: 0 }}>
-        <p style={{ color: 'black', fontSize: '30px', fontFamily: "'Barlow', sans-serif", textAlign: 'center' }}>Welcome to the Instructions Page!</p>
-        <hr />
-        <p style={{ color: 'black', fontSize: '18px', fontFamily: "'Barlow', sans-serif", textAlign: 'justify' }}>
-          In this page, we will go through a guide on how to use this application for the optimal results. Here are a list of things you should follow:
-        </p>
-
-        <div className="accordion accordion-flush" id="accordionFlush">
-          {/* File Format */}
-          <div className="accordion-item">
-            <h2 className="accordion-header">
-              <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-1" style={{ fontSize: '20px', fontFamily: "'Barlow', sans-serif" }}>File Format</button>
-            </h2>
-            <div id="flush-1" className="accordion-collapse collapse" data-bs-parent="#accordionFlush">
-              <div className="accordion-body">
-                <p style={{ color: 'black', fontSize: '18px', fontFamily: "'Barlow', sans-serif", textAlign: 'justify' }}>The file format of the resume or job description must be any one of the following:</p>
-                <ol style={{ fontSize: '18px', fontFamily: "'Barlow', sans-serif" }}>
-                  <li title="Portable Document Format">PDF</li>
-                  <li title="Document File">DOCX</li>
-                  <li title="Text File">TXT</li>
-                </ol>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: 800, margin: '0 auto' }}>
+        
+        {/* Supported Formats */}
+        <div className="card-dark">
+          <div className="section-badge badge-purple" style={{ marginBottom: '1rem' }}>Supported Formats</div>
+          <h3 style={{ margin: '0 0 0.5rem', color: '#fff', fontSize: '1.1rem', fontFamily: 'var(--font)' }}>File Types</h3>
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.92rem', lineHeight: 1.6, margin: '0 0 1rem' }}>
+            To ensure our NER model can accurately parse text, please upload your resumes and job descriptions in one of the following standard formats:
+          </p>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            {['📄 PDF', '📝 DOCX', '📃 TXT'].map(ext => (
+              <div key={ext} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', padding: '0.5rem 1rem', borderRadius: 'var(--radius-sm)', color: '#fff', fontSize: '0.9rem', fontWeight: 600 }}>
+                {ext}
               </div>
-            </div>
+            ))}
           </div>
+        </div>
 
-          {/* Resume Format */}
-          <div className="accordion-item">
-            <h2 className="accordion-header">
-              <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-2" style={{ fontSize: '20px', fontFamily: "'Barlow', sans-serif" }}>Resume Format</button>
-            </h2>
-            <div id="flush-2" className="accordion-collapse collapse" data-bs-parent="#accordionFlush">
-              <div className="accordion-body">
-                <p style={{ color: 'black', fontSize: '18px', fontFamily: "'Barlow', sans-serif", textAlign: 'justify' }}>The resume file may be in any format. However to guarantee optimal results, the following format is desired:</p>
-                <img className="rounded mx-auto d-block" src="/images/resumeSample.PNG" alt="Resume Sample" />
-                <p style={{ color: 'black', fontSize: '18px', fontFamily: "'Barlow', sans-serif", textAlign: 'justify' }}>Here is the docx file for this format, if you want to structure your file in this format:</p>
-                <button onClick={downloadResume} className="btn btn-dark btn-lg" style={{ color: 'white', fontSize: '15px', fontFamily: "'Barlow', sans-serif" }}>Download Resume</button>
+        {/* Templates */}
+        <div className="card-dark">
+          <div className="section-badge badge-green" style={{ marginBottom: '1rem' }}>Optimal Structure</div>
+          <h3 style={{ margin: '0 0 0.5rem', color: '#fff', fontSize: '1.1rem', fontFamily: 'var(--font)' }}>Using Templates</h3>
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.92rem', lineHeight: 1.6, margin: '0 0 1.5rem' }}>
+            While our AI can extract information from mostly any layout, using a clear structured format guarantees the highest precision. We've provided templates you can use to structure your data.
+          </p>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
+            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', padding: '1.25rem', borderRadius: 'var(--radius-sm)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <h4 style={{ margin: '0 0 0.2rem', color: '#fff', fontSize: '0.95rem' }}>Resume Template</h4>
+                <p style={{ margin: 0, color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>Standardized sections for skills, education, and experience.</p>
               </div>
+              <button onClick={() => downloadFile('/docx/resume.docx')} className="btn-outline-dark" style={{ width: '100%', justifyContent: 'center' }}>
+                ⬇️ Download Resume DOCX
+              </button>
             </div>
-          </div>
 
-          {/* Job Description Format */}
-          <div className="accordion-item">
-            <h2 className="accordion-header">
-              <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-3" style={{ fontSize: '20px', fontFamily: "'Barlow', sans-serif" }}>Job Description Format</button>
-            </h2>
-            <div id="flush-3" className="accordion-collapse collapse" data-bs-parent="#accordionFlush">
-              <div className="accordion-body">
-                <p style={{ color: 'black', fontSize: '18px', fontFamily: "'Barlow', sans-serif", textAlign: 'justify' }}>The job description file may be in any format. However to guarantee optimal results, the following format is desired:</p>
-                <img className="rounded mx-auto d-block" src="/images/jobSample.PNG" alt="Job Sample" />
-                <p style={{ color: 'black', fontSize: '18px', fontFamily: "'Barlow', sans-serif", textAlign: 'justify' }}>Here is the docx file for this format, if you want to structure your file in this format:</p>
-                <button onClick={downloadJob} className="btn btn-dark btn-lg" style={{ color: 'white', fontSize: '15px', fontFamily: "'Barlow', sans-serif" }}>Download Job Description</button>
+            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', padding: '1.25rem', borderRadius: 'var(--radius-sm)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <h4 style={{ margin: '0 0 0.2rem', color: '#fff', fontSize: '0.95rem' }}>JD Template</h4>
+                <p style={{ margin: 0, color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>Clear structure for requirements, responsibilities, and tools.</p>
               </div>
-            </div>
-          </div>
-
-          {/* Customizable Weights */}
-          <div className="accordion-item">
-            <h2 className="accordion-header">
-              <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-4" style={{ fontSize: '20px', fontFamily: "'Barlow', sans-serif" }}>Customizable Weights</button>
-            </h2>
-            <div id="flush-4" className="accordion-collapse collapse" data-bs-parent="#accordionFlush">
-              <div className="accordion-body">
-                <p style={{ color: 'black', fontSize: '18px', fontFamily: "'Barlow', sans-serif", textAlign: 'justify' }}>By default, the weights assigned to key features are as follows:</p>
-                <table className="table table-hover" style={{ fontSize: '15px', fontFamily: "'Barlow', sans-serif", textAlign: 'justify' }}>
-                  <thead><tr><th>Feature</th><th>Default Weight</th></tr></thead>
-                  <tbody>
-                    <tr><th>Experience</th><td>0.3</td></tr>
-                    <tr><th>Education</th><td>0.2</td></tr>
-                    <tr><th>Skills</th><td>0.4</td></tr>
-                    <tr><th>Language</th><td>0.1</td></tr>
-                  </tbody>
-                </table>
-                <p style={{ color: 'black', fontSize: '18px', fontFamily: "'Barlow', sans-serif", textAlign: 'justify' }}>Customizing feature weights is only accessible to admins. You need to login as the admin to administer any customization.</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Get Started */}
-          <div className="accordion-item">
-            <h2 className="accordion-header">
-              <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-5" style={{ fontSize: '20px', fontFamily: "'Barlow', sans-serif" }}>Get Started</button>
-            </h2>
-            <div id="flush-5" className="accordion-collapse collapse" data-bs-parent="#accordionFlush">
-              <div className="accordion-body">
-                <p style={{ color: 'black', fontSize: '18px', fontFamily: "'Barlow', sans-serif", textAlign: 'justify' }}>Now that you're familiar with the how tos. It's time to get started. Pick anything and begin the journey:</p>
-                <ul className="list-group">
-                  <li className="list-group-item"><Link to="/parse-resume" style={{ color: 'black', textDecoration: 'none', fontSize: '18px', fontFamily: "'Barlow', sans-serif" }}>Parse Resume</Link></li>
-                  <li className="list-group-item"><Link to="/parse-job" style={{ color: 'black', textDecoration: 'none', fontSize: '18px', fontFamily: "'Barlow', sans-serif" }}>Parse Job Description</Link></li>
-                  <li className="list-group-item"><Link to="/rank" style={{ color: 'black', textDecoration: 'none', fontSize: '18px', fontFamily: "'Barlow', sans-serif" }}>Rank</Link></li>
-                </ul>
-              </div>
+              <button onClick={() => downloadFile('/docx/job.docx')} className="btn-outline-dark" style={{ width: '100%', justifyContent: 'center' }}>
+                ⬇️ Download JD DOCX
+              </button>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Carousel */}
-      <div id="introCarousel" className="carousel slide" data-bs-ride="carousel">
-        <div className="carousel-inner">
-          {['intro2.jpg', 'intro3.jpg', 'intro4.jpg', 'intro5.jpg'].map((img, i) => (
-            <div className={`carousel-item ${i === 0 ? 'active' : ''}`} key={img}>
-              <img src={`/images/${img}`} className="d-block w-100" alt={`slide ${i + 1}`} />
-            </div>
-          ))}
+        {/* Weights */}
+        <div className="card-dark">
+          <div className="section-badge badge-purple" style={{ marginBottom: '1rem' }}>Ranking Metrics</div>
+          <h3 style={{ margin: '0 0 0.5rem', color: '#fff', fontSize: '1.1rem', fontFamily: 'var(--font)' }}>Understanding Weights</h3>
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.92rem', lineHeight: 1.6, margin: '0 0 1.5rem' }}>
+            By default, HireSense ranks candidates by comparing extracted features against the job description using the following weight distribution. Admins can customize these weights globally in the Admin panel.
+          </p>
+
+          <table className="dark-table" style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
+            <thead>
+              <tr>
+                <th>Feature Matrix</th>
+                <th>Default Influence Weight</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Skills</strong> (Hard, Soft, Tools)</td>
+                <td><span style={{ color: 'var(--primary-2)', fontWeight: 700 }}>40%</span> (0.4)</td>
+              </tr>
+              <tr>
+                <td><strong>Experience</strong> (Duration, Roles)</td>
+                <td><span style={{ color: 'var(--primary-2)', fontWeight: 700 }}>30%</span> (0.3)</td>
+              </tr>
+              <tr>
+                <td><strong>Education</strong> (Degree, Field)</td>
+                <td><span style={{ color: 'var(--primary-2)', fontWeight: 700 }}>20%</span> (0.2)</td>
+              </tr>
+              <tr>
+                <td><strong>Languages</strong></td>
+                <td><span style={{ color: 'var(--primary-2)', fontWeight: 700 }}>10%</span> (0.1)</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <button className="carousel-control-prev" type="button" data-bs-target="#introCarousel" data-bs-slide="prev">
-          <span className="carousel-control-prev-icon" aria-hidden="true"></span>
-          <span className="visually-hidden">Previous</span>
-        </button>
-        <button className="carousel-control-next" type="button" data-bs-target="#introCarousel" data-bs-slide="next">
-          <span className="carousel-control-next-icon" aria-hidden="true"></span>
-          <span className="visually-hidden">Next</span>
-        </button>
+
+        {/* Start */}
+        <div className="card-dark" style={{ background: 'linear-gradient(135deg, rgba(108,99,255,0.1), rgba(167,139,250,0.05))', borderColor: 'rgba(108,99,255,0.2)' }}>
+          <h3 style={{ margin: '0 0 0.5rem', color: '#fff', fontSize: '1.2rem', fontFamily: 'var(--font)' }}>Ready to begin?</h3>
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.92rem', margin: '0 0 1.5rem' }}>
+            Jump into the action by using one of the core tools below.
+          </p>
+          <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
+            <Link to="/rank" className="btn-primary-dark">🏆 Rank Resumes</Link>
+            <Link to="/parse-resume" className="btn-outline-dark">📄 Parse Resume</Link>
+            <Link to="/parse-job" className="btn-outline-dark">💼 Parse JD</Link>
+          </div>
+        </div>
+
       </div>
-    </>
+    </div>
   );
 }

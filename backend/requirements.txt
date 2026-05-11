@@ -15,3 +15,5 @@ Flask-Session
 Authlib
 gunicorn
 python-dotenv
+flask-sqlalchemy
+flask-mail

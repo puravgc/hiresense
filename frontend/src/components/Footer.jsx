@@ -1,236 +1,66 @@
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
 
 export default function Footer() {
   return (
-    <footer className="text-center text-lg-start bg-body-tertiary text-muted">
-      <section className="d-flex justify-content-center justify-content-lg-between p-4 border-bottom">
-        <div className="me-5 d-none d-lg-block">
-          <span style={{ fontFamily: "'Barlow', sans-serif" }}>
-            Get connected with us on our socials:
-          </span>
-        </div>
-        <div>
-          <a href="#" className="me-4 text-reset">
-            <img src="/images/github.png" height="25" width="25" alt="github" />
-          </a>
-          <a href="https://www.google.com/" className="me-4 text-reset">
-            <img src="/images/google.png" height="25" width="25" alt="google" />
-          </a>
-          <a href="https://www.linkedin.com/home" className="me-4 text-reset">
-            <img
-              src="/images/linkedin.png"
-              height="25"
-              width="25"
-              alt="linkedin"
-            />
-          </a>
-          <a href="https://www.instagram.com/" className="me-4 text-reset">
-            <img
-              src="/images/instagram.png"
-              height="25"
-              width="25"
-              alt="instagram"
-            />
-          </a>
-          <a href="https://x.com/" className="me-4 text-reset">
-            <img
-              src="/images/twitter.png"
-              height="25"
-              width="25"
-              alt="twitter"
-            />
-          </a>
-          <a href="https://www.youtube.com/" className="me-4 text-reset">
-            <img
-              src="/images/youtube.png"
-              height="25"
-              width="25"
-              alt="youtube"
-            />
-          </a>
-        </div>
-      </section>
-
-      <section>
-        <div className="container text-center text-md-start mt-5">
-          <div className="row mt-3">
-            <div className="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
-              <h6 className="text-uppercase fw-bold mb-4">
-                <span style={{ fontFamily: "'Barlow', sans-serif" }}>
-                  HireSense
-                </span>
-              </h6>
-              <p style={{ fontFamily: "'Barlow', sans-serif" }}>
-                We provide you with an efficient tool to parse your resumes and
-                job descriptions. Not only that, you can use our ranking system
-                to compare and rank your resumes against a job description of
-                your choosing.
-              </p>
-            </div>
-            <div className="col-md-2 col-lg-2 col-xl-2 mx-auto mb-4">
-              <h6 className="text-uppercase fw-bold mb-4">
-                <span style={{ fontFamily: "'Barlow', sans-serif" }}>
-                  Useful Links
-                </span>
-              </h6>
-              <p>
-                <Link
-                  to="/"
-                  className="text-reset"
-                  style={{
-                    textDecoration: "none",
-                    fontFamily: "'Barlow', sans-serif",
-                  }}
-                >
-                  What is it?
-                </Link>
-              </p>
-              <p>
-                <Link
-                  to="/intro"
-                  className="text-reset"
-                  style={{
-                    textDecoration: "none",
-                    fontFamily: "'Barlow', sans-serif",
-                  }}
-                >
-                  How does it work?
-                </Link>
-              </p>
-              <p>
-                <a
-                  href="https://www.indeed.com/career-advice/resumes-cover-letters/how-to-make-a-resume-with-examples"
-                  className="text-reset"
-                  style={{
-                    textDecoration: "none",
-                    fontFamily: "'Barlow', sans-serif",
-                  }}
-                >
-                  How to write resumes?
-                </a>
-              </p>
-              <p>
-                <a
-                  href="https://www.wright.edu/human-resources/writing-an-effective-job-description"
-                  className="text-reset"
-                  style={{
-                    textDecoration: "none",
-                    fontFamily: "'Barlow', sans-serif",
-                  }}
-                >
-                  How to write job descriptions?
-                </a>
-              </p>
-            </div>
-            <div className="col-md-3 col-lg-2 col-xl-2 mx-auto mb-4">
-              <h6 className="text-uppercase fw-bold mb-4">
-                <span style={{ fontFamily: "'Barlow', sans-serif" }}>
-                  Our Features
-                </span>
-              </h6>
-              <p>
-                <Link
-                  to="/parse-resume"
-                  className="text-reset"
-                  style={{
-                    textDecoration: "none",
-                    fontFamily: "'Barlow', sans-serif",
-                  }}
-                >
-                  Parse Resumes
-                </Link>
-              </p>
-              <p>
-                <Link
-                  to="/parse-job"
-                  className="text-reset"
-                  style={{
-                    textDecoration: "none",
-                    fontFamily: "'Barlow', sans-serif",
-                  }}
-                >
-                  Parse Job Descriptions
-                </Link>
-              </p>
-              <p>
-                <Link
-                  to="/rank"
-                  className="text-reset"
-                  style={{
-                    textDecoration: "none",
-                    fontFamily: "'Barlow', sans-serif",
-                  }}
-                >
-                  Rank Resumes
-                </Link>
-              </p>
-            </div>
-            <div className="col-md-4 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4">
-              <h6 className="text-uppercase fw-bold mb-4">
-                <span style={{ fontFamily: "'Barlow', sans-serif" }}>
-                  Contact
-                </span>
-              </h6>
-              <p style={{ fontFamily: "'Barlow', sans-serif" }}>
-                <img
-                  src="/images/map.png"
-                  height="25"
-                  width="20"
-                  style={{ opacity: 0.5 }}
-                  alt="map"
-                />{" "}
-                Lamachaur, Pokhara-16
-              </p>
-              <p>
-                <Link
-                  to="/about"
-                  className="text-reset"
-                  style={{
-                    textDecoration: "none",
-                    fontFamily: "'Barlow', sans-serif",
-                  }}
-                >
-                  <img
-                    src="/images/page.png"
-                    height="20"
-                    width="20"
-                    style={{ opacity: 0.5 }}
-                    alt="page"
-                  />{" "}
-                  About Us
-                </Link>
-              </p>
-              <p style={{ fontFamily: "'Barlow', sans-serif" }}>
-                <img
-                  src="/images/phone.png"
-                  height="20"
-                  width="20"
-                  style={{ opacity: 0.5 }}
-                  alt="phone"
-                />{" "}
-                981234567 
-              </p>
-            </div>
+    <footer style={{
+      marginTop: '3rem',
+      borderTop: '1px solid rgba(255,255,255,0.07)',
+      padding: '2rem 1rem 1.5rem',
+      fontFamily: 'var(--font)',
+    }}>
+      <div style={{ maxWidth: 960, margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '2rem', marginBottom: '2rem' }}>
+          {/* Brand */}
+          <div>
+            <h6 style={{ color: '#fff', fontWeight: 700, fontSize: '0.88rem', marginBottom: '0.75rem', letterSpacing: '0.04em', textTransform: 'uppercase' }}>HireSense</h6>
+            <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: '0.82rem', lineHeight: 1.7, margin: 0 }}>
+              NER-based AI resume ranking system. Parse, score, and rank candidates in seconds.
+            </p>
+          </div>
+          {/* Links */}
+          <div>
+            <h6 style={{ color: '#fff', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.75rem', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Quick Links</h6>
+            {[
+              { to: '/dashboard', label: 'Home' },
+              { to: '/intro', label: 'How It Works' },
+              { to: '/about', label: 'About Us' },
+            ].map(l => (
+              <div key={l.to} style={{ marginBottom: '0.4rem' }}>
+                <Link to={l.to} style={{ color: 'rgba(255,255,255,0.42)', fontSize: '0.83rem', textDecoration: 'none', transition: 'color 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#a78bfa'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.42)'}
+                >{l.label}</Link>
+              </div>
+            ))}
+          </div>
+          {/* Features */}
+          <div>
+            <h6 style={{ color: '#fff', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.75rem', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Features</h6>
+            {[
+              { to: '/parse-resume', label: 'Parse Resume' },
+              { to: '/parse-job', label: 'Parse Job Description' },
+              { to: '/rank', label: 'Rank Resumes' },
+            ].map(l => (
+              <div key={l.to} style={{ marginBottom: '0.4rem' }}>
+                <Link to={l.to} style={{ color: 'rgba(255,255,255,0.42)', fontSize: '0.83rem', textDecoration: 'none', transition: 'color 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#a78bfa'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.42)'}
+                >{l.label}</Link>
+              </div>
+            ))}
+          </div>
+          {/* Contact */}
+          <div>
+            <h6 style={{ color: '#fff', fontWeight: 700, fontSize: '0.78rem', marginBottom: '0.75rem', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Contact</h6>
+            <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: '0.83rem', margin: '0 0 0.35rem' }}>📍 Lamachaur, Pokhara-16</p>
+            <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: '0.83rem', margin: 0 }}>📞 981234567</p>
           </div>
         </div>
-      </section>
-
-      <div
-        className="text-center p-4"
-        style={{
-          backgroundColor: "rgba(0, 0, 0, 0.05)",
-          fontFamily: "'Barlow', sans-serif",
-        }}
-      >
-        © 2025 Copyright:
-        <a className="text-reset" style={{ textDecoration: "none" }} href="#">
-          <span
-            style={{ fontWeight: "bold", fontFamily: "'Barlow', sans-serif" }}
-          >
-            {" "}
-            HireSense
-          </span>
-        </a>
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '1.25rem', textAlign: 'center' }}>
+          <p style={{ color: 'rgba(255,255,255,0.22)', fontSize: '0.78rem', margin: 0 }}>
+            © 2025 HireSense · NER-Powered Resume Ranking System
+          </p>
+        </div>
       </div>
     </footer>
   );
