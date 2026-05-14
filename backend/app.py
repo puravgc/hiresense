@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, session, send_file
+from flask import Flask, request, jsonify, session, send_file, send_from_directory
 from flask_session import Session
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
@@ -26,11 +26,11 @@ from modules.features.compResFeats import compResFeats
 from modules.similarity.reranker import rerank_resumes
 from modules.ai_summary import generate_bulk_summaries
 
-# Initialize Flask app
-app = Flask(__name__)
+# Initialize Flask app - Points to the build folder of React
+app = Flask(__name__, static_folder='../frontend/dist', static_url_path='/')
 
-# CORS: allow React frontend to talk to this API
-CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "http://localhost:5173"}})
+# CORS: allow React frontend to talk to this API (Local + Prod)
+CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": ["http://localhost:5173", os.getenv("PROD_URL", "")]}})
 
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
@@ -696,6 +696,18 @@ def api_delete_candidate(cand_id):
     db.session.delete(cand)
     db.session.commit()
     return jsonify({"message": "Candidate deleted successfully"})
+
+# ========================
+# PRODUCTION FRONTEND SERVING
+# ========================
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(app.static_folder + '/' + path):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == '__main__':
     app.run(debug=True, host="localhost", port=5000)
