@@ -37,6 +37,7 @@ def language_similarity(job, res):
         "intermediate": 2, "Intermediate": 2, "Intermed": 2,
         "Conversational": 2.5,
         "fluent": 3, "fluency": 3, "Fluent": 3,
+        "Proficient": 3.5, "proficient": 3.5, "Proficiency": 3.5, "proficiency": 3.5,
         "advanced": 4, "Advanced": 4
     }
     
