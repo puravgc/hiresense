@@ -78,6 +78,18 @@ export default function Dashboard() {
     );
   };
 
+  const handleDelete = async (candId) => {
+    if (!window.confirm("Are you sure you want to delete this candidate?")) return;
+    try {
+      await API.delete(`/candidates/${candId}`);
+      setCandidates((prev) => prev.filter((c) => c.id !== candId));
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete candidate");
+    }
+  };
+
+
   if (loading)
     return (
       <div id="loading">
@@ -297,6 +309,7 @@ export default function Dashboard() {
                                   style={{
                                     display: "flex",
                                     justifyContent: "space-between",
+                                    alignItems: "flex-start",
                                   }}
                                 >
                                   <div
@@ -304,22 +317,58 @@ export default function Dashboard() {
                                       fontWeight: 600,
                                       fontSize: "0.95rem",
                                       color: "#fff",
+                                      flex: 1,
+                                      paddingRight: "0.5rem"
                                     }}
                                   >
                                     {cand.name}
                                   </div>
-                                  <div
-                                    style={{
-                                      color: scoreColor(cand.score),
-                                      fontSize: "0.78rem",
-                                      fontWeight: 800,
-                                      background: "rgba(0,0,0,0.3)",
-                                      padding: "2px 8px",
-                                      borderRadius: "6px",
-                                      border: `1px solid ${scoreColor(cand.score)}33`,
-                                    }}
-                                  >
-                                    {cand.score.toFixed(0)}%
+                                  <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                                    <div
+                                      style={{
+                                        color: scoreColor(cand.score),
+                                        fontSize: "0.78rem",
+                                        fontWeight: 800,
+                                        background: "rgba(0,0,0,0.3)",
+                                        padding: "2px 8px",
+                                        borderRadius: "6px",
+                                        border: `1px solid ${scoreColor(cand.score)}33`,
+                                      }}
+                                    >
+                                      {cand.score.toFixed(0)}%
+                                    </div>
+                                    <button 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDelete(cand.id);
+                                      }}
+                                      style={{
+                                        background: 'rgba(255,255,255,0.05)',
+                                        border: 'none',
+                                        color: 'rgba(255,255,255,0.3)',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.8rem',
+                                        width: '20px',
+                                        height: '20px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        transition: 'all 0.2s',
+                                        padding: 0
+                                      }}
+                                      onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = 'rgba(244,67,54,0.1)';
+                                        e.currentTarget.style.color = '#f44336';
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                                        e.currentTarget.style.color = 'rgba(255,255,255,0.3)';
+                                      }}
+                                      title="Delete Candidate"
+                                    >
+                                      ✕
+                                    </button>
                                   </div>
                                 </div>
                                 <div
@@ -378,13 +427,24 @@ export default function Dashboard() {
                                   </div>
                                 </div>
 
-                                <div
-                                  style={{
-                                    marginTop: "1rem",
-                                    display: "flex",
-                                    justifyContent: "flex-end",
-                                  }}
-                                >
+                                {cand.ai_summary && (
+                                  <div style={{ 
+                                    marginTop: '1rem', 
+                                    padding: '0.75rem', 
+                                    background: 'rgba(108,99,255,0.05)', 
+                                    borderRadius: '8px',
+                                    fontSize: '0.7rem',
+                                    lineHeight: '1.4',
+                                    color: 'rgba(255,255,255,0.7)',
+                                    borderLeft: '2px solid var(--accent)'
+                                  }}>
+                                    <strong style={{ display: 'block', color: 'var(--accent)', fontSize: '0.65rem', marginBottom: '4px', textTransform: 'uppercase' }}>AI Insight</strong>
+                                    {cand.ai_summary}
+                                  </div>
+                                )}
+
+                                <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
+
                                   <Link
                                     to={`/view-details?job_path=${encodeURIComponent(currentJob?.job_path)}&resume_path=${encodeURIComponent(cand.resume_path)}&exp=${cand.experience_match || 0}&edu=${cand.education_match || 0}&skill=${cand.skill_match || 0}&lang=${cand.language_match || 0}&score=${cand.score}`}
                                     className="btn-outline-dark"

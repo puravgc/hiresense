@@ -100,6 +100,30 @@ export default function ViewDetails() {
         <div style={{ fontSize: '3rem', fontWeight: 900, color: overall, lineHeight: 1 }}>{similarity_score?.toFixed(2)}%</div>
       </div>
 
+      {data.ai_summary && (
+        <div className="card-dark" style={{ 
+          marginBottom: '2rem', 
+          borderLeft: '4px solid var(--accent)',
+          background: 'rgba(108,99,255,0.03)',
+          padding: '1.5rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+            <span style={{ fontSize: '1.25rem' }}>🤖</span>
+            <h3 style={{ margin: 0, fontSize: '0.9rem', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '1px' }}>AI Match Insight</h3>
+          </div>
+          <p style={{ 
+            margin: 0, 
+            fontSize: '1rem', 
+            lineHeight: '1.6', 
+            color: 'rgba(255,255,255,0.85)',
+            fontStyle: 'italic'
+          }}>
+            "{data.ai_summary}"
+          </p>
+        </div>
+      )}
+
+
       {/* Score Breakdown */}
       <div className="card-dark" style={{ marginBottom: '2rem' }}>
         <div className="section-badge badge-purple" style={{ marginBottom: '1rem' }}>Score Breakdown</div>

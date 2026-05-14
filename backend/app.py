@@ -24,6 +24,7 @@ from modules.features.displayJobFeats import displayJobFeats
 from modules.features.compJobFeats import compJobFeats
 from modules.features.compResFeats import compResFeats
 from modules.similarity.reranker import rerank_resumes
+from modules.ai_summary import generate_bulk_summaries
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -98,6 +99,7 @@ class SavedCandidate(db.Model):
     education_match  = db.Column(db.Float, default=0.0)
     skill_match      = db.Column(db.Float, default=0.0)
     language_match   = db.Column(db.Float, default=0.0)
+    ai_summary       = db.Column(db.Text)
     created_at   = db.Column(db.DateTime, default=datetime.utcnow)
 
 # Create all tables on startup
@@ -516,6 +518,14 @@ def api_view_details():
     weights = session.get('weights', DEFAULT_WEIGHTS)
     is_admin = session.get('admin_logged_in', False)
 
+    # Check if we have a saved summary for this candidate
+    existing_cand = SavedCandidate.query.join(JobListing).filter(
+        JobListing.job_path == job_path,
+        SavedCandidate.resume_path == resume_path
+    ).first()
+    ai_summary = existing_cand.ai_summary if existing_cand else None
+
+
     return jsonify({
         "jobFeats": jobFeats,
         "resFeats": resFeats,
@@ -525,7 +535,8 @@ def api_view_details():
         "skill_match": skill_match,
         "language_match": language_match,
         "weights": weights,
-        "is_admin": is_admin
+        "is_admin": is_admin,
+        "ai_summary": ai_summary
     })
 
 # ========================
@@ -582,8 +593,11 @@ def api_save_job_history():
         db.session.add(new_job)
         db.session.flush() # Get the new_job.id
 
+        # Batch generate AI summaries to save API quota
+        ai_summaries = generate_bulk_summaries(candidates)
+        
         # Save Candidates
-        for cand in candidates:
+        for i, cand in enumerate(candidates):
             new_cand = SavedCandidate(
                 name=cand.get('name'),
                 email=cand.get('candidate_email'),
@@ -593,9 +607,11 @@ def api_save_job_history():
                 education_match=cand.get('education_match', 0.0),
                 skill_match=cand.get('skill_match', 0.0),
                 language_match=cand.get('language_match', 0.0),
+                ai_summary=ai_summaries[i],
                 job_id=new_job.id
             )
             db.session.add(new_cand)
+
         
         db.session.commit()
         return jsonify({"message": "Hiring session saved successfully", "job_id": new_job.id})
@@ -647,6 +663,7 @@ def api_get_job_candidates(job_id):
             "education_match": c.education_match,
             "skill_match": c.skill_match,
             "language_match": c.language_match,
+            "ai_summary": c.ai_summary,
             "created_at": c.created_at.isoformat()
         } for c in job.candidates]
     })
@@ -667,7 +684,18 @@ def api_update_candidate_status(cand_id):
     
     cand.status = new_status
     db.session.commit()
-    return jsonify({"message": "Status updated successfully"})
+@app.route('/api/candidates/<int:cand_id>', methods=['DELETE'])
+@login_required
+def api_delete_candidate(cand_id):
+    """Delete a saved candidate."""
+    cand = SavedCandidate.query.get_or_404(cand_id)
+    # Check ownership via the linked job
+    if cand.job.user_id != current_user.id:
+        return jsonify({"error": "Unauthorized"}), 403
+    
+    db.session.delete(cand)
+    db.session.commit()
+    return jsonify({"message": "Candidate deleted successfully"})
 
 if __name__ == '__main__':
     app.run(debug=True, host="localhost", port=5000)
