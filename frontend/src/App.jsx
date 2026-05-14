@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ResultsProvider } from './context/ResultsContext';
 import Sidebar from './components/Sidebar';
 import Footer from './components/Footer';
 import LandingPage from './pages/LandingPage';
@@ -79,9 +80,11 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <AppRoutes />
-      </Router>
+      <ResultsProvider>
+        <Router>
+          <AppRoutes />
+        </Router>
+      </ResultsProvider>
     </AuthProvider>
   );
 }

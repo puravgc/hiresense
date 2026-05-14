@@ -23,6 +23,7 @@ from modules.features.displayResFeats import displayResFeats
 from modules.features.displayJobFeats import displayJobFeats
 from modules.features.compJobFeats import compJobFeats
 from modules.features.compResFeats import compResFeats
+from modules.similarity.reranker import rerank_resumes
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -441,9 +442,17 @@ def api_rank():
             "skill_match": round(similarity_results.get("skill_match", 0), 2),
             "language_match": round(similarity_results.get("language_match", 0), 2),
             "candidate_email": candidate_email or "",
+            "resume_text": resume_text # Needed for reranking
         })
 
     ranked_resumes.sort(key=lambda x: x["score"], reverse=True)
+
+    # Apply Cross-Encoder Reranking on the top 5 candidates
+    ranked_resumes = rerank_resumes(job_text, ranked_resumes, top_n=5)
+
+    # Remove resume_text from response to keep it light
+    for res in ranked_resumes:
+        res.pop('resume_text', None)
 
     return jsonify({
         "ranked_resumes": ranked_resumes,

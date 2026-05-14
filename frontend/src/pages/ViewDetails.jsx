@@ -75,7 +75,10 @@ export default function ViewDetails() {
 
   return (
     <div className="page-wide animate-up">
-      <div className="page-header">
+      <div className="page-header" style={{ position: 'relative' }}>
+        <Link to="/results" className="btn-outline-dark" style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>
+          ← Back to Results
+        </Link>
         <span className="page-icon">🔍</span>
         <h1 className="page-title">Match Details</h1>
         <p className="page-subtitle">Detailed breakdown of how this resume matches the job description</p>

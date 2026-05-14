@@ -2,12 +2,15 @@ import { useLocation, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import API from '../api/axios';
 import EmailModal from '../components/EmailModal';
+import { useResults } from '../context/ResultsContext';
 
 const scoreColor = s => s >= 70 ? '#10b981' : s >= 40 ? '#f59e0b' : '#f87171';
 
 export default function Results() {
   const location = useLocation();
-  const data = location.state || {};
+  const { results: contextResults } = useResults();
+  
+  const data = contextResults || location.state || {};
   const rankedResumes = data.ranked_resumes || [];
   const jobPath = data.job_path || '';
 
@@ -59,6 +62,11 @@ export default function Results() {
                     </td>
                     <td>
                       <strong>{resume.name}</strong>
+                      {resume.is_reranked && (
+                        <span className="badge-purple" style={{ fontSize: '0.65rem', marginLeft: '0.5rem', padding: '0.1rem 0.4rem', verticalAlign: 'middle' }}>
+                          AI Reranked
+                        </span>
+                      )}
                       {resume.candidate_email && (
                         <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.38)', marginTop: 2 }}>{resume.candidate_email}</div>
                       )}
@@ -76,7 +84,6 @@ export default function Results() {
                         to={`/view-details?job_path=${encodeURIComponent(jobPath)}&resume_path=${encodeURIComponent(resume.resume_path)}&exp=${resume.experience_match}&edu=${resume.education_match}&skill=${resume.skill_match}&lang=${resume.language_match}&score=${resume.score}`}
                         className="btn-outline-dark"
                         style={{ fontSize: '0.8rem', padding: '0.4rem 0.9rem' }}
-                        target="_blank" rel="noopener noreferrer"
                       >
                         View Details
                       </Link>

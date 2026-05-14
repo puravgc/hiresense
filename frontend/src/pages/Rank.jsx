@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import API from '../api/axios';
 import Toast from '../components/Toast';
 import FileDropzone from '../components/FileDropzone';
+import { useResults } from '../context/ResultsContext';
 
 export default function Rank() {
   const [jobFile, setJobFile] = useState(null);
@@ -10,6 +11,7 @@ export default function Rank() {
   const [toast, setToast] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { setResults } = useResults();
 
   const handleJobSelected = (file) => {
     setJobFile(file);
@@ -33,7 +35,8 @@ export default function Rank() {
     for (const file of resumeFiles) formData.append('resumes', file);
     try {
       const res = await API.post('/rank', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-      navigate('/results', { state: res.data });
+      setResults(res.data);
+      navigate('/results');
     } catch (err) {
       setToast({ message: err.response?.data?.error || 'Ranking failed!', type: 'error' });
     } finally { setLoading(false); }
