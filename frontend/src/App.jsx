@@ -17,6 +17,7 @@ import JobDetails from './pages/JobDetails';
 import Rank from './pages/Rank';
 import Results from './pages/Results';
 import ViewDetails from './pages/ViewDetails';
+import Dashboard from './pages/Dashboard';
 import Onboarding from './pages/Onboarding';
 import './App.css';
 
@@ -57,10 +58,11 @@ function AppRoutes() {
       <Route path="/onboarding" element={<Onboarding />} />
 
       {/* ── Protected app routes (with sidebar) ── */}
-      <Route path="/dashboard" element={<AppGuard><AppLayout><Home /></AppLayout></AppGuard>} />
-      <Route path="/intro"     element={<AppGuard><AppLayout><Intro /></AppLayout></AppGuard>} />
-      <Route path="/about"     element={<AppGuard><AppLayout><About /></AppLayout></AppGuard>} />
-      <Route path="/login"     element={<AppGuard><AppLayout><Login /></AppLayout></AppGuard>} />
+      <Route path="/home"           element={<AppGuard><AppLayout><Home /></AppLayout></AppGuard>} />
+      <Route path="/dashboard"      element={<AppGuard><AppLayout><Dashboard /></AppLayout></AppGuard>} />
+      <Route path="/intro"          element={<AppGuard><AppLayout><Intro /></AppLayout></AppGuard>} />
+      <Route path="/about"          element={<AppGuard><AppLayout><About /></AppLayout></AppGuard>} />
+      <Route path="/login"          element={<AppGuard><AppLayout><Login /></AppLayout></AppGuard>} />
       <Route path="/admin-login"    element={<AppGuard><AppLayout><AdminLogin /></AppLayout></AppGuard>} />
       <Route path="/customize"      element={<AppGuard><AppLayout><Customize /></AppLayout></AppGuard>} />
       <Route path="/parse-resume"   element={<AppGuard><AppLayout><ParseResume /></AppLayout></AppGuard>} />

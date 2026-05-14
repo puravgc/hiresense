@@ -29,7 +29,7 @@ from modules.similarity.reranker import rerank_resumes
 app = Flask(__name__)
 
 # CORS: allow React frontend to talk to this API
-CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
+CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "http://localhost:5173"}})
 
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
@@ -52,13 +52,13 @@ app.config['GOOGLE_CLIENT_SECRET'] = os.getenv("GOOGLE_CLIENT_SECRET")
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", 'dev-secret-key')
 
 # ========================
-# DATABASE SETUP (SQLite)
+# DATABASE SETUP (PostgreSQL prioritized)
 # ========================
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
-    "DATABASE_URL",
-    "postgresql://user:password@localhost:5432/hiresense"
-)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
+if not app.config['SQLALCHEMY_DATABASE_URI']:
+    BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(BASE_DIR, 'hiresense.db')}"
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -75,6 +75,30 @@ class HirerProfile(db.Model):
     your_role    = db.Column(db.String(100))
     created_at   = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at   = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class JobListing(db.Model):
+    __tablename__ = 'job_listings'
+    id           = db.Column(db.Integer, primary_key=True)
+    title        = db.Column(db.String(200), nullable=False)
+    job_path     = db.Column(db.String(500))
+    user_id      = db.Column(db.String(100), nullable=False) # google_id
+    created_at   = db.Column(db.DateTime, default=datetime.utcnow)
+    candidates   = db.relationship('SavedCandidate', backref='job', lazy=True, cascade="all, delete-orphan")
+
+class SavedCandidate(db.Model):
+    __tablename__ = 'saved_candidates'
+    id           = db.Column(db.Integer, primary_key=True)
+    name         = db.Column(db.String(200))
+    email        = db.Column(db.String(200))
+    score        = db.Column(db.Float)
+    job_id       = db.Column(db.Integer, db.ForeignKey('job_listings.id'), nullable=False)
+    resume_path  = db.Column(db.String(500))
+    status       = db.Column(db.String(50), default='Shortlisted') # Shortlisted, Contacted, Interviewing, Rejected, Hired
+    experience_match = db.Column(db.Float, default=0.0)
+    education_match  = db.Column(db.Float, default=0.0)
+    skill_match      = db.Column(db.Float, default=0.0)
+    language_match   = db.Column(db.Float, default=0.0)
+    created_at   = db.Column(db.DateTime, default=datetime.utcnow)
 
 # Create all tables on startup
 with app.app_context():
@@ -533,8 +557,117 @@ def api_customize():
         except Exception as e:
             return jsonify({"error": str(e)}), 400
 
-    weights = session.get('weights', DEFAULT_WEIGHTS)
-    return jsonify({"weights": weights})
+@app.route('/api/jobs/save', methods=['POST'])
+@login_required
+def api_save_job_history():
+    """Save a ranking session results to the database."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+    
+    job_title = data.get('job_title', 'Untitled Job')
+    job_path = data.get('job_path')
+    candidates = data.get('candidates', [])
+    
+    if not candidates:
+        return jsonify({"error": "No candidates to save"}), 400
+
+    try:
+        # Create Job Entry
+        new_job = JobListing(
+            title=job_title,
+            job_path=job_path,
+            user_id=current_user.id
+        )
+        db.session.add(new_job)
+        db.session.flush() # Get the new_job.id
+
+        # Save Candidates
+        for cand in candidates:
+            new_cand = SavedCandidate(
+                name=cand.get('name'),
+                email=cand.get('candidate_email'),
+                score=cand.get('score'),
+                resume_path=cand.get('resume_path'),
+                experience_match=cand.get('experience_match', 0.0),
+                education_match=cand.get('education_match', 0.0),
+                skill_match=cand.get('skill_match', 0.0),
+                language_match=cand.get('language_match', 0.0),
+                job_id=new_job.id
+            )
+            db.session.add(new_cand)
+        
+        db.session.commit()
+        return jsonify({"message": "Hiring session saved successfully", "job_id": new_job.id})
+    except Exception as e:
+        print(f"SAVE ERROR: {e}")
+        import traceback
+        traceback.print_exc()
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/jobs', methods=['GET'])
+@login_required
+def api_get_jobs():
+    """Fetch all past jobs for the current hirer."""
+    try:
+        print(f"FETCH JOBS for user: {current_user.id}")
+        jobs = JobListing.query.filter_by(user_id=str(current_user.id)).order_by(JobListing.created_at.desc()).all()
+        return jsonify({
+            "jobs": [{
+                "id": j.id,
+                "title": j.title,
+                "job_path": j.job_path,
+                "created_at": j.created_at.isoformat(),
+                "candidate_count": len(j.candidates)
+            } for j in jobs]
+        })
+    except Exception as e:
+        print(f"FETCH ERROR: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/jobs/<int:job_id>/candidates', methods=['GET'])
+@login_required
+def api_get_job_candidates(job_id):
+    """Fetch all candidates for a specific job."""
+    job = JobListing.query.get_or_404(job_id)
+    if job.user_id != current_user.id:
+        return jsonify({"error": "Unauthorized"}), 403
+    
+    return jsonify({
+        "job_title": job.title,
+        "candidates": [{
+            "id": c.id,
+            "name": c.name,
+            "email": c.email,
+            "score": c.score,
+            "resume_path": c.resume_path,
+            "status": c.status,
+            "experience_match": c.experience_match,
+            "education_match": c.education_match,
+            "skill_match": c.skill_match,
+            "language_match": c.language_match,
+            "created_at": c.created_at.isoformat()
+        } for c in job.candidates]
+    })
+
+@app.route('/api/candidates/<int:cand_id>/status', methods=['POST'])
+@login_required
+def api_update_candidate_status(cand_id):
+    """Update the status of a saved candidate."""
+    data = request.get_json()
+    new_status = data.get('status')
+    if not new_status:
+        return jsonify({"error": "Status is required"}), 400
+    
+    cand = SavedCandidate.query.get_or_404(cand_id)
+    # Check if this candidate belongs to a job owned by the current user
+    if cand.job.user_id != current_user.id:
+        return jsonify({"error": "Unauthorized"}), 403
+    
+    cand.status = new_status
+    db.session.commit()
+    return jsonify({"message": "Status updated successfully"})
 
 if __name__ == '__main__':
     app.run(debug=True, host="localhost", port=5000)
