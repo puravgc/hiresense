@@ -20,10 +20,15 @@ def calculate_similarity(job, resume):
         weights = default_weights
 
     # Calculate component similarities
-    exp = experience_similarity(job, resume) * 100 if experience_similarity(job, resume) else 0.0
-    edu = education_similarity(job, resume) * 100 if education_similarity(job, resume) else 0.0
-    skill = skill_similarity(job, resume) * 100 if skill_similarity(job, resume) else 0.0
-    lang = language_similarity(job, resume) * 100 if language_similarity(job, resume) else 0.0
+    exp_val = experience_similarity(job, resume)
+    edu_val = education_similarity(job, resume)
+    skill_val = skill_similarity(job, resume)
+    lang_val = language_similarity(job, resume)
+
+    exp = exp_val * 100 if exp_val else 0.0
+    edu = edu_val * 100 if edu_val else 0.0
+    skill = skill_val * 100 if skill_val else 0.0
+    lang = lang_val * 100 if lang_val else 0.0
 
     # Debug logging
     # print("-------------------------------")

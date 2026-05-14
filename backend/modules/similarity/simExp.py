@@ -75,7 +75,7 @@ def experience_similarity(job, res):
 
     # Compare Job titles with resume roles
     titleScore = cosine_similarity(jobTitStr, resRolStr)
-    rolScore = cosine_similarity(jobRolStr, resTooStr)
+    rolScore = cosine_similarity(jobRolStr, resRolStr)
     fldScore = cosine_similarity(jobFidStr, resFidStr)
     hadScore = cosine_similarity(jobHadStr, resHadStr)
     tooScore = cosine_similarity(jobTooStr, resTooStr)
