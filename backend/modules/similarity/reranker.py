@@ -34,9 +34,9 @@ def rerank_resumes(job_text, candidates, top_n=5):
         import numpy as np
         norm_score = 1 / (1 + np.exp(-score)) * 100
         
-        # Blend: 70% Cross-Encoder, 30% original Bi-Encoder score
+        # Blend: 40% Cross-Encoder, 60% original Bi-Encoder score
         original_score = to_rerank[i]['score']
-        final_score = (float(norm_score) * 0.7) + (float(original_score) * 0.3)
+        final_score = (float(norm_score) * 0.4) + (float(original_score) * 0.6)
         to_rerank[i]['score'] = round(final_score, 2)
         to_rerank[i]['is_reranked'] = True
 

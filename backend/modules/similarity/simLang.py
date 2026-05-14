@@ -40,23 +40,22 @@ def language_similarity(job, res):
         "advanced": 4, "Advanced": 4
     }
     
-    jobLangProf = [prof.get(pro, -1) for pro in jobProf]
-    resLangProf = [prof.get(pro, -1) for pro in resProf]
+    jobLangProf = [p for p in [prof.get(pro, -1) for pro in jobProf] if p != -1]
+    resLangProf = [p for p in [prof.get(pro, -1) for pro in resProf] if p != -1]
     
     # print(f"Job Proficiency: {jobLangProf}")
     # print(f"Resume Proficiency: {resLangProf}")
     
-    if not jobLangProf or not resLangProf:
-        return 0.0
-    
-    minJobProf = min(jobLangProf)
-    maxResProf = max(resLangProf)
-    
-    if maxResProf >= minJobProf:
-        proScore = 1.0
-    else:
-        diff = minJobProf - maxResProf
-        proScore = max(0, 1.0 - (diff / 3))  # Normalize difference with max priority 3
+    proScore = 0.0
+    if jobLangProf and resLangProf:
+        minJobProf = min(jobLangProf)
+        maxResProf = max(resLangProf)
+        
+        if maxResProf >= minJobProf:
+            proScore = 1.0
+        else:
+            diff = minJobProf - maxResProf
+            proScore = max(0, 1.0 - (diff / 3))  # Normalize difference with max priority 3
 
     # print(f"Proficiency Score: {proScore}")
     
