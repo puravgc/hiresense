@@ -684,6 +684,7 @@ def api_update_candidate_status(cand_id):
     
     cand.status = new_status
     db.session.commit()
+    return jsonify({"message": "Status updated successfully"})
 @app.route('/api/candidates/<int:cand_id>', methods=['DELETE'])
 @login_required
 def api_delete_candidate(cand_id):
