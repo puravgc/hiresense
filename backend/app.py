@@ -102,12 +102,9 @@ class SavedCandidate(db.Model):
     ai_summary       = db.Column(db.Text)
     created_at   = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Create all tables on startup safely
+# Create all tables on startup
 with app.app_context():
-    try:
-        db.create_all()
-    except Exception as e:
-        print(f"Database sync skipped (will retry on first request): {e}")
+    db.create_all()
 
 # ========================
 # MAIL SETUP
@@ -700,6 +697,6 @@ def api_delete_candidate(cand_id):
     db.session.commit()
     return jsonify({"message": "Candidate deleted successfully"})
 
+
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))
-    app.run(debug=False, host="0.0.0.0", port=port)
+    app.run(debug=True, host="localhost", port=5000)
