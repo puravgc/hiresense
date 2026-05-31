@@ -31,7 +31,7 @@ def displayResFeats(res):
         "phone": ", ".join(phone or ["Unavailable"]),
         "dob": ", ".join(dob or ["Unavailable"]),
 
-        "experience": ", ".join(f"{role or 'Unavailable Role'} ( {duration or 'Unavailable Duration'} ) ( {months or 'Unavailable Months'} )" for role, duration, months in zip_longest(expRoles, expYrs, expMonths)) + " in fields like " + ", ".join(f"{field or 'Unavailable Field'}" for field in expFields),
+        "experience": ", ".join(f"{role or 'Unavailable Role'} ( {duration or 'Unavailable Duration'} ) ( {months or 'Unavailable Months'} )" for role, duration, months in zip_longest(expRoles, expYrs, expMonths)) + (" in fields like " + ", ".join(expFields) if expFields else ""),
 
         "education": ", ".join(f"{deg or 'Unavailable Degree'} in {field or 'Unavailable Field'}" for deg, field in zip(eduDegs, eduFields)),
         

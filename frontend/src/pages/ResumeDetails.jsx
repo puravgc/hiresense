@@ -7,11 +7,12 @@ export default function ResumeDetails() {
   const rows = [
     ['👤 Name', features.name], ['📧 Email', features.email], ['📞 Phone', features.phone],
     ['🔗 Links', features.links], ['🎂 DOB', features.dob],
-    ['💼 Experience Roles', features.exp_roles], ['⏱ Experience Fields', features.exp_fields],
-    ['🎓 Education Degrees', features.edu_degrees], ['📚 Education Fields', features.edu_fields],
+    ['💼 Experience', features.experience],
+    ['🎓 Education', features.education],
     ['⚡ Hard Skills', features.hards], ['🤝 Soft Skills', features.softs],
     ['🔧 Tools', features.tools], ['📦 Products', features.products],
-    ['🏢 Sectors', features.sectors], ['🌐 Languages', features.language],
+    ['🏢 Sectors', features.sectors], ['🎯 Interests', features.interests],
+    ['🌐 Languages', features.language],
     ['🏆 Certifications', features.certifications],
   ];
 
