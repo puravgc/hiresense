@@ -9,14 +9,14 @@ const TEAM = [
   },
   {
     name: "Hitesh Bhatt",
-    roll: "79011900",
+    roll: "79011882",
     img: "4.jpg",
     contact: "",
     email: "",
   },
   {
     name: "Ishwor Sharma",
-    roll: "79011900",
+    roll: "79011883",
     img: "4.jpg",
     contact: "",
     email: "",
