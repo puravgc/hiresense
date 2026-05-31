@@ -2,12 +2,21 @@ import { useState, useEffect } from 'react';
 import API from '../api/axios';
 import './EmailModal.css';
 
-export default function EmailModal({ candidate, hirerProfile, onClose }) {
+export default function EmailModal({ candidate, hirerProfile: initialHirerProfile, onClose, onSuccess }) {
   const [to, setTo] = useState(candidate?.email || '');
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState(null); // { type: 'success'|'error', message }
+  const [status, setStatus] = useState(null);
+  const [hirerProfile, setHirerProfile] = useState(initialHirerProfile || null);
+
+  useEffect(() => {
+    if (!initialHirerProfile) {
+      API.get('/hirer/profile').then(res => {
+        if (res.data.has_profile) setHirerProfile(res.data.profile);
+      }).catch(err => console.error("Failed to fetch profile", err));
+    }
+  }, [initialHirerProfile]);
 
   const companyName = hirerProfile?.company_name || 'Our Company';
   const yourName    = hirerProfile?.your_name || '';
@@ -40,6 +49,7 @@ ${yourName ? yourName + '\n' : ''}${yourRole} — ${companyName}`
     try {
       const res = await API.post('/send-email', { to_email: to, subject, body });
       setStatus({ type: 'success', message: res.data.message });
+      if (onSuccess) onSuccess(candidate);
       setTimeout(() => onClose(), 2200);
     } catch (e) {
       setStatus({ type: 'error', message: e.response?.data?.error || 'Failed to send email.' });

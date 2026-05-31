@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import API from "../api/axios";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import EmailModal from "../components/EmailModal";
 
 const STATUS_OPTIONS = [
   "Shortlisted",
@@ -19,6 +20,18 @@ export default function Dashboard() {
   const [selectedJobId, setSelectedJobId] = useState("");
   const [candidates, setCandidates] = useState([]);
   const [loadingCandidates, setLoadingCandidates] = useState(false);
+  const [emailCandidate, setEmailCandidate] = useState(null);
+
+  const handleEmailSuccess = async (cand) => {
+    if (cand.status === "Shortlisted") {
+      try {
+        await API.post(`/candidates/${cand.id}/status`, { status: "Contacted" });
+        setCandidates(prev => prev.map(c => c.id === cand.id ? { ...c, status: "Contacted" } : c));
+      } catch (err) {
+        console.error("Failed to update status after email", err);
+      }
+    }
+  };
 
   useEffect(() => {
     API.get("/jobs")
@@ -99,6 +112,31 @@ export default function Dashboard() {
 
   const currentJob = jobs.find((j) => j.id.toString() === selectedJobId);
 
+  const exportToCSV = () => {
+    if (!candidates || candidates.length === 0) return;
+    const headers = ["Name", "Email", "Status", "Overall Score", "Experience Match", "Education Match", "Skill Match", "Language Match", "Added On"];
+    const rows = candidates.map(c => [
+      `"${c.name}"`,
+      `"${c.email || ''}"`,
+      `"${c.status}"`,
+      `${c.score.toFixed(0)}%`,
+      `${c.experience_match.toFixed(0)}%`,
+      `${c.education_match.toFixed(0)}%`,
+      `${c.skill_match.toFixed(0)}%`,
+      `${c.language_match.toFixed(0)}%`,
+      `"${new Date(c.created_at).toLocaleDateString()}"`
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n" + rows.map(r => r.join(",")).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    const jobName = currentJob ? currentJob.title.replace(/[\s\W]+/g, '_') : 'pipeline';
+    link.setAttribute("download", `${jobName}_candidates.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div
       style={{
@@ -132,7 +170,7 @@ export default function Dashboard() {
           </p>
         </div>
 
-        <div style={{ minWidth: "320px" }}>
+        <div style={{ minWidth: "320px", display: "flex", gap: "1rem", alignItems: "center", justifyContent: "flex-end" }}>
           <select
             value={selectedJobId}
             onChange={handleJobChange}
@@ -159,6 +197,32 @@ export default function Dashboard() {
               </option>
             ))}
           </select>
+          <button
+            onClick={exportToCSV}
+            title="Download pipeline as CSV"
+            style={{
+              padding: "0.8rem 1rem",
+              background: "rgba(108,99,255,0.1)",
+              border: "1px solid rgba(108,99,255,0.3)",
+              color: "var(--accent)",
+              borderRadius: "var(--radius-sm)",
+              cursor: "pointer",
+              fontWeight: 600,
+              fontSize: "0.85rem",
+              whiteSpace: "nowrap",
+              transition: "all 0.2s"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "var(--accent)";
+              e.currentTarget.style.color = "#fff";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(108,99,255,0.1)";
+              e.currentTarget.style.color = "var(--accent)";
+            }}
+          >
+            📥 Export CSV
+          </button>
         </div>
       </div>
 
@@ -443,8 +507,22 @@ export default function Dashboard() {
                                   </div>
                                 )}
 
-                                <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
-
+                                <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); setEmailCandidate(cand); }}
+                                    className="btn-outline-dark"
+                                    style={{
+                                      fontSize: "0.68rem",
+                                      padding: "0.3rem 0.8rem",
+                                      border: "1px solid rgba(255,255,255,0.2)",
+                                      color: "rgba(255,255,255,0.7)",
+                                      background: "transparent",
+                                      borderRadius: "6px",
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    ✉ Email
+                                  </button>
                                   <Link
                                     to={`/view-details?job_path=${encodeURIComponent(currentJob?.job_path)}&resume_path=${encodeURIComponent(cand.resume_path)}&exp=${cand.experience_match || 0}&edu=${cand.education_match || 0}&skill=${cand.skill_match || 0}&lang=${cand.language_match || 0}&score=${cand.score}`}
                                     className="btn-outline-dark"
@@ -470,6 +548,14 @@ export default function Dashboard() {
             ))}
           </div>
         </DragDropContext>
+      )}
+      
+      {emailCandidate && (
+        <EmailModal
+          candidate={emailCandidate}
+          onClose={() => setEmailCandidate(null)}
+          onSuccess={(cand) => handleEmailSuccess(cand)}
+        />
       )}
     </div>
   );
